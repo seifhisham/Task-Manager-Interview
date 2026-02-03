@@ -8,12 +8,25 @@ def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
     try:
         from django.core.management import execute_from_command_line
+        import django
+        from django.core.management import call_command
     except ImportError as exc:
         raise ImportError(
             "Couldn't import Django. Are you sure it's installed and "
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+
+    # Automatically apply migrations when running the development server
+    if len(sys.argv) > 1 and sys.argv[1] == 'runserver':
+        try:
+            django.setup()
+            call_command('migrate', interactive=False)
+        except Exception:
+            # If migrations fail (e.g. database not created yet),
+            # continue so that the error is visible in the usual way.
+            pass
+
     execute_from_command_line(sys.argv)
 
 
